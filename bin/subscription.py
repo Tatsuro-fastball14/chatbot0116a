@@ -41,3 +41,6 @@ def cancel_subscription(subscription_id):
 # customer_id = create_customer('example@email.com', 'pm_card_visa')
 # plan_id = create_plan(5000, 'month')  # 月額5000円のプランを作成
 # subscription = create_subscription(customer_id, plan_id)ああああ
+aa
+
+aa
