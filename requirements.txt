@@ -4,4 +4,4 @@ pyyaml
 streamlit-authenticator
 plotly
 pandas
-langchainhub== 0.1.21
+langchain== 0.3.14
