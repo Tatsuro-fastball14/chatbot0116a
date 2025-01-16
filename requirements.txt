@@ -1,5 +1,5 @@
 streamlit
-python-dotenv
+python-dotenv==1.0.1
 pyyaml
 streamlit-authenticator
 plotly
@@ -12,4 +12,3 @@ fastapi
 uvicorn
 numpy
 grpcio
-python-dotenv==1.0.1
