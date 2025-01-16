@@ -16,7 +16,10 @@ import os
 from openai import OpenAI
 
 load_dotenv()
-
+vectorstore = Chroma.from_documents(
+    documents,
+    embedding=OpenAIEmbeddings(),
+)
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
     embeddings = OpenAIEmbeddings()
