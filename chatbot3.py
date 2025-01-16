@@ -14,7 +14,7 @@ import openai
 from dotenv import load_dotenv
 import os
 from openai import OpenAI
-
+from chromadb import PersistentClient
 load_dotenv()
 vectorstore = Chroma.from_documents(
     documents,
