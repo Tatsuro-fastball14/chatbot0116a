@@ -12,3 +12,4 @@ fastapi
 uvicorn
 numpy
 grpcio
+python-dotenv==1.0.1
