@@ -4,3 +4,4 @@ pyyaml
 streamlit-authenticator
 plotly
 pandas
+python-dotenv= 1.0.1
