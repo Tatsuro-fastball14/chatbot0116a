@@ -4,7 +4,7 @@ import streamlit as st
 from dotenv import load_dotenv
 from langchain import hub
 from langchain.schema import AIMessage, HumanMessage
-from langchain.vectorstores import Chroma  
+from langchain_chroma import Chroma 
 from langchain_community.document_loaders import TextLoader
 from langchain_core.runnables import RunnablePassthrough, RunnableSequence
 from langchain_core.vectorstores import VectorStoreRetriever
