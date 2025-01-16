@@ -1,14 +1,9 @@
 streamlit
-python-dotenv==1.0.1
+python-dotenv
 pyyaml
 streamlit-authenticator
 plotly
 pandas
+langchain== 0.3.14
+langchain-chroma== 0.2.0
 chromadb==0.3.26
-langchain
-langchain_chroma
-pydantic
-fastapi
-uvicorn
-numpy
-grpcio
