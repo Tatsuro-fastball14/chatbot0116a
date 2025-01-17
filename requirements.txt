@@ -8,7 +8,6 @@ langchain==0.3.14
 langchain-core
 langchain-community
 langchain-chroma==0.2.0
-chromadb
 chromadol== 0.1.2
 langchain-openai==0.3.0
 chromadb==0.6.3
