@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import streamlit as st
 from dotenv import load_dotenv
 from langchain import hub
@@ -10,34 +9,35 @@ from langchain_core.runnables import RunnablePassthrough, RunnableSequence
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-import openai
-from dotenv import load_dotenv
-import os
-from openai import OpenAI
-from chromadb import PersistentClient
 from langchain.docstore.document import Document
+import os
+
+# Load environment variables
 load_dotenv()
-vectorstore = Chroma.from_documents(
-    documents,
-    embedding=OpenAIEmbeddings(),
-)
+
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
     embeddings = OpenAIEmbeddings()
 
     vector_store_path = "./resources/note.db"
     if Path(vector_store_path).exists():
+        # Load the persistent vector store
         vector_store = Chroma(embedding_function=embeddings, persist_directory=vector_store_path)
     else:
-        loader = TextLoader("resources/note.txt")
-        docs = loader.load()
+        # Load documents and create a new vector store
+        try:
+            loader = TextLoader("resources/note.txt")
+            docs = loader.load()
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        splits = text_splitter.split_documents(docs)
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+            splits = text_splitter.split_documents(docs)
 
-        vector_store = Chroma.from_documents(
-            documents=splits, embedding=embeddings, persist_directory=vector_store_path
-        )
+            vector_store = Chroma.from_documents(
+                documents=splits, embedding=embeddings, persist_directory=vector_store_path
+            )
+        except Exception as e:
+            st.error(f"Error initializing vector store: {e}")
+            raise e
 
     return vector_store
 
@@ -47,8 +47,8 @@ def initialize_retriever() -> VectorStoreRetriever:
     return vector_store.as_retriever()
 
 def initialize_chain() -> RunnableSequence:
-    """Initialize the Langchain."""
-    prompt = hub.pull("rlm/rag-prompt")
+    """Initialize the LangChain."""
+    prompt = hub.pull("rlm/rag-prompt")  # Ensure this prompt is available
     llm = ChatOpenAI()
     retriever = initialize_retriever()
     chain = (
@@ -58,34 +58,20 @@ def initialize_chain() -> RunnableSequence:
 
 def main() -> None:
     """Main function for the ChatGPT using Streamlit."""
-    chain = initialize_chain()
+    try:
+        chain = initialize_chain()
 
-    # Configure the page
-    st.set_page_config(page_title="RAG ChatGPT")
-    st.header("RAG ChatGPT")
+        # Configure the page
+        st.set_page_config(page_title="RAG ChatGPT")
+        st.header("RAG ChatGPT")
 
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+        # Initialize chat history
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
 
-    # Monitor user input
-    if user_input := st.chat_input("聞きたいことを入力してね！"):
-        st.session_state.messages.append(HumanMessage(content=user_input))
-        with st.spinner("GPT is typing ..."):
-            response = chain.invoke(user_input)
-        st.session_state.messages.append(AIMessage(content=response.content))
-
-    # Display chat history
-    messages = st.session_state.get("messages", [])
-    for message in messages:
-        if isinstance(message, AIMessage):
-            with st.chat_message("assistant"):
-                st.markdown(message.content)
-        elif isinstance(message, HumanMessage):
-            with st.chat_message("user"):
-                st.markdown(message.content)
-        else:
-            st.write(f"System message: {message.content}")
-
-if __name__ == "__main__":
-    main()
+        # Monitor user input
+        if user_input := st.chat_input("聞きたいことを入力してね！"):
+            st.session_state.messages.append(HumanMessage(content=user_input))
+            with st.spinner("GPT is typing ..."):
+                response = chain.invoke({"context": st.session_state.messages, "question": user_input})
+            st.session_state
