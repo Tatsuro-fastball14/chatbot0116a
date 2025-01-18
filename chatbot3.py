@@ -17,7 +17,10 @@ from openai import OpenAI
 from chromadb import PersistentClient
 from langchain.docstore.document import Document
 load_dotenv()
-
+vectorstore = Chroma.from_documents(
+    documents,
+    embedding=OpenAIEmbeddings(),
+)
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
     embeddings = OpenAIEmbeddings()
