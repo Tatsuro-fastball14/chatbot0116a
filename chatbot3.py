@@ -1,6 +1,7 @@
 
 import streamlit as st
 from dotenv import load_dotenv
+import os
 from langchain import hub
 from langchain.schema import AIMessage, HumanMessage
 from langchain.vectorstores import Chroma
@@ -9,17 +10,16 @@ from langchain_core.runnables import RunnablePassthrough, RunnableSequence
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-import os
 
-# 環境変数のロード
-load_dotenv()
+# `.env` を明示的にロード
+load_dotenv(dotenv_path=".env", override=True)
 
 # OpenAI APIキーを取得
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
-# APIキーが設定されているか確認
+# 環境変数のチェック
 if not openai_api_key:
-    st.error("⚠ `OPENAI_API_KEY` が見つかりません。`.env` に設定してください。")
+    st.error("⚠ `.env` が正しく読み込まれていない可能性があります。環境変数を確認してください。")
     raise ValueError("`OPENAI_API_KEY` が設定されていません")
 
 def initialize_vector_store() -> Chroma:
