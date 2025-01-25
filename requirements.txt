@@ -1,15 +1,11 @@
 streamlit
-python-dotenv==1.0.1
-pyyaml
-streamlit-authenticator
-plotly
-pandas
-langchain==0.3.14
-langchain-core
-langchain-community
-langchain-chroma==0.2.0
-chromadol== 0.1.2
-langchain-openai==0.3.0
-chromadb-client==0.6.3
-openai==0.28.1
-
+python = ">=3.12,<3.13"
+python-dotenv = "^1.0.1"
+chromadb = "0.5.2"
+langchain = "0.2.5"
+langchain-cli = "0.0.25"
+langchain-openai = "0.1.8"
+langchain-community = "0.2.5"
+langchain-chroma = "0.1.1"
+langchainhub = "0.1.20"
+streamlit = "1.35.0"
