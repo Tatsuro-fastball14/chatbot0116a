@@ -17,21 +17,7 @@ from openai import OpenAI
 from chromadb import PersistentClient
 from langchain.docstore.document import Document
 
-    vector_store_path = "./resources/note.db"
-    if Path(vector_store_path).exists():
-        vector_store = Chroma(embedding_function=embeddings, persist_directory=vector_store_path)
-    else:
-        loader = TextLoader("resources/note.txt")
-        docs = loader.load()
-
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        splits = text_splitter.split_documents(docs)
-
-        vector_store = Chroma.from_documents(
-            documents=splits, embedding=embeddings, persist_directory=vector_store_path
-        )
-
-    return vector_store
+  
 
 def initialize_retriever() -> VectorStoreRetriever:
     """Initialize the Retriever."""
