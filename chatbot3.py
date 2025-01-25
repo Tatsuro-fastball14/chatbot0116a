@@ -20,6 +20,7 @@ from openai import OpenAI
 from chromadb import PersistentClient
 from langchain.docstore.document import Document
 openai.api_key="sk-nJWmKuPmoDvZB2kUBa5Y7LoMmAwaoBJ2_eP9AK9uXdT3BlbkFJDFZYvjvXqsMLhel42HTdNnyqs20dMkOrVN3D0XOVUA"
+os.environ["OPENAI_API_KEY"] ="sk-nJWmKuPmoDvZB2kUBa5Y7LoMmAwaoBJ2_eP9AK9uXdT3BlbkFJDFZYvjvXqsMLhel42HTdNnyqs20dMkOrVN3D0XOVUA"
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
     embeddings = OpenAIEmbeddings()
