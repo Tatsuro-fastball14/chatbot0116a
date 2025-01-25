@@ -51,8 +51,9 @@ def initialize_chain() -> RunnableSequence:
     prompt = hub.pull("rlm/rag-prompt")
     llm = OpenAI(api_key="sk-nJWmKuPmoDvZB2kUBa5Y7LoMmAwaoBJ2_eP9AK9uXdT3BlbkFJDFZYvjvXqsMLhel42HTdNnyqs20dMkOrVN3D0XOVUA")
     retriever = initialize_retriever()
+    context = "\n".join(doc.page_content for doc in retriever)
     chain = (
-        {"context": retriever, "question": RunnablePassthrough()} | prompt | llm
+        {"context": lambda x: context, "question": RunnablePassthrough()} | prompt | llm
     )
     return chain
 
