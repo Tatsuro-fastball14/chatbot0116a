@@ -19,7 +19,7 @@ import os
 from openai import OpenAI
 from chromadb import PersistentClient
 from langchain.docstore.document import Document
-
+openai.api_key="sk-nJWmKuPmoDvZB2kUBa5Y7LoMmAwaoBJ2_eP9AK9uXdT3BlbkFJDFZYvjvXqsMLhel42HTdNnyqs20dMkOrVN3D0XOVUA"
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
     embeddings = OpenAIEmbeddings()
@@ -48,7 +48,7 @@ def initialize_retriever() -> VectorStoreRetriever:
 def initialize_chain() -> RunnableSequence:
     """Initialize the Langchain."""
     prompt = hub.pull("rlm/rag-prompt")
-    llm = OpenAI(openai_api_key="sk-nJWmKuPmoDvZB2kUBa5Y7LoMmAwaoBJ2_eP9AK9uXdT3BlbkFJDFZYvjvXqsMLhel42HTdNnyqs20dMkOrVN3D0XOVUA")
+    llm = OpenAI()
     retriever = initialize_retriever()
     chain = (
         {"context": retriever, "question": RunnablePassthrough()} | prompt | llm
