@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import streamlit as st
-from dotenv import load_dotenv
+
 from langchain import hub
 from langchain.schema import AIMessage, HumanMessage
 from langchain.vectorstores import Chroma
@@ -16,11 +16,6 @@ import os
 from openai import OpenAI
 from chromadb import PersistentClient
 from langchain.docstore.document import Document
-load_dotenv()
-
-def initialize_vector_store() -> Chroma:
-    """Initialize the VectorStore."""
-    embeddings = OpenAIEmbeddings()
 
     vector_store_path = "./resources/note.db"
     if Path(vector_store_path).exists():
