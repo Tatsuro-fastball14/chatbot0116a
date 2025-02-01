@@ -19,7 +19,7 @@ import os
 load_dotenv()
 
 # Set OpenAI API key
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = st.secrets["openai"]["api_key"] if "openai" in st.secrets else os.getenv("OPENAI_API_KEY")
 if not api_key:
     st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
     st.stop()
@@ -33,7 +33,7 @@ llm = ChatOpenAI(
 
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     vector_store_path = "./resources/note.db"
 
     if Path(vector_store_path).exists():
