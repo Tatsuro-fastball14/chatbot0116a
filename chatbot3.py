@@ -7,7 +7,7 @@ import streamlit as st
 
 from langchain import hub
 from langchain.schema import AIMessage, HumanMessage
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma  # 修正されたインポート
 from langchain_community.document_loaders import TextLoader
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -20,10 +20,9 @@ load_dotenv()
 
 # Set OpenAI API key
 api_key = os.getenv("OPENAI_API_KEY")
-if api_key is None:
-    raise ValueError("OPENAI_API_KEY が設定されていません。")
-
-os.environ["OPENAI_API_KEY"] = api_key
+if not api_key:
+    st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
+    st.stop()
 
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
@@ -57,11 +56,15 @@ def initialize_chain():
     retriever = initialize_retriever()
 
     def chain(user_input):
-        retrieved_docs = retriever.get_relevant_documents(user_input)
-        context = "\n".join([doc.page_content for doc in retrieved_docs])
-        formatted_prompt = prompt.format(context=context, question=user_input)
-        response = llm.invoke(formatted_prompt)
-        return response
+        try:
+            retrieved_docs = retriever.get_relevant_documents(user_input)
+            context = "\n".join([doc.page_content for doc in retrieved_docs])
+            formatted_prompt = prompt.format(context=context, question=user_input)
+            response = llm.invoke(formatted_prompt)
+            return response
+        except Exception as e:
+            st.error(f"エラーが発生しました: {e}")
+            return AIMessage(content="申し訳ありません、現在問題が発生しています。後でもう一度お試しください。")
 
     return chain
 
@@ -80,7 +83,7 @@ def main() -> None:
     # Monitor user input
     if user_input := st.chat_input("聞きたいことを入力してね！"):
         st.session_state.messages.append(HumanMessage(content=user_input))
-        with st.spinner("GPT is typing ..."):
+        with st.spinner("GPTが入力中です..."):
             response = chain(user_input)
         st.session_state.messages.append(AIMessage(content=response.content))
 
@@ -98,4 +101,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
