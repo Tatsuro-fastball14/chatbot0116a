@@ -9,23 +9,27 @@ from langchain import hub
 from langchain.schema import AIMessage, HumanMessage
 from langchain.vectorstores import Chroma
 from langchain_community.document_loaders import TextLoader
-from langchain_core.runnables import RunnablePassthrough, RunnableSequence
+from langchain_core.runnables import RunnableSequence
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import openai
 from dotenv import load_dotenv
 import os
-from openai import OpenAI
 from chromadb import PersistentClient
 from langchain.docstore.document import Document
-openai.api_key="sk-nJWmKuPmoDvZB2kUBa5Y7LoMmAwaoBJ2_eP9AK9uXdT3BlbkFJDFZYvjvXqsMLhel42HTdNnyqs20dMkOrVN3D0XOVUA"
-os.environ["OPENAI_API_KEY"] ="sk-nJWmKuPmoDvZB2kUBa5Y7LoMmAwaoBJ2_eP9AK9uXdT3BlbkFJDFZYvjvXqsMLhel42HTdNnyqs20dMkOrVN3D0XOVUA"
+
+# Load environment variables
+load_dotenv()
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
     embeddings = OpenAIEmbeddings()
-
     vector_store_path = "./resources/note.db"
+
     if Path(vector_store_path).exists():
         vector_store = Chroma(embedding_function=embeddings, persist_directory=vector_store_path)
     else:
@@ -49,11 +53,11 @@ def initialize_retriever() -> VectorStoreRetriever:
 def initialize_chain() -> RunnableSequence:
     """Initialize the Langchain."""
     prompt = hub.pull("rlm/rag-prompt")
-    llm = OpenAI(api_key="sk-nJWmKuPmoDvZB2kUBa5Y7LoMmAwaoBJ2_eP9AK9uXdT3BlbkFJDFZYvjvXqsMLhel42HTdNnyqs20dMkOrVN3D0XOVUA")
+    llm = ChatOpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
     retriever = initialize_retriever()
-    # context = "\n".join(doc.page_content for doc in retriever)
+
     chain = (
-        {"context": lambda x:retriever, "question": RunnablePassthrough()} | prompt | llm
+        {"context": lambda x: retriever, "question": lambda x: x} | prompt | llm
     )
     return chain
 
