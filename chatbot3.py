@@ -9,20 +9,16 @@ from langchain import hub
 from langchain.schema import AIMessage, HumanMessage
 from langchain.vectorstores import Chroma
 from langchain_community.document_loaders import TextLoader
-from langchain_core.runnables import RunnableSequence
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-import openai
 from dotenv import load_dotenv
 import os
-from chromadb import PersistentClient
-from langchain.docstore.document import Document
 
 # Load environment variables
 load_dotenv()
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Set OpenAI API key
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
 def initialize_vector_store() -> Chroma:
@@ -50,15 +46,19 @@ def initialize_retriever() -> VectorStoreRetriever:
     vector_store = initialize_vector_store()
     return vector_store.as_retriever()
 
-def initialize_chain() -> RunnableSequence:
+def initialize_chain():
     """Initialize the Langchain."""
     prompt = hub.pull("rlm/rag-prompt")
     llm = ChatOpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
     retriever = initialize_retriever()
 
-    chain = (
-        {"context": lambda x: retriever, "question": lambda x: x} | prompt | llm
-    )
+    def chain(user_input):
+        retrieved_docs = retriever.get_relevant_documents(user_input)
+        context = "\n".join([doc.page_content for doc in retrieved_docs])
+        formatted_prompt = prompt.format(context=context, question=user_input)
+        response = llm.invoke(formatted_prompt)
+        return response
+
     return chain
 
 def main() -> None:
@@ -77,7 +77,7 @@ def main() -> None:
     if user_input := st.chat_input("聞きたいことを入力してね！"):
         st.session_state.messages.append(HumanMessage(content=user_input))
         with st.spinner("GPT is typing ..."):
-            response = chain.invoke(user_input)
+            response = chain(user_input)
         st.session_state.messages.append(AIMessage(content=response.content))
 
     # Display chat history
