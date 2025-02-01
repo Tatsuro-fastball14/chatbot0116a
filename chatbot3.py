@@ -24,6 +24,13 @@ if not api_key:
     st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
     st.stop()
 
+# Initialize ChatOpenAI with api_base
+llm = ChatOpenAI(
+    openai_api_key=api_key,
+    model_name="gpt-4",  # または "gpt-3.5-turbo"
+    api_base="https://api.openai.com/v1"  # API ベースURLを明示的に指定
+)
+
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
     embeddings = OpenAIEmbeddings()
@@ -52,7 +59,6 @@ def initialize_retriever() -> VectorStoreRetriever:
 def initialize_chain():
     """Initialize the Langchain."""
     prompt = hub.pull("rlm/rag-prompt")
-    llm = ChatOpenAI(openai_api_key=api_key)
     retriever = initialize_retriever()
 
     def chain(user_input):
