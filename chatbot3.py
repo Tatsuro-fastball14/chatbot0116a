@@ -19,7 +19,11 @@ import os
 load_dotenv()
 
 # Set OpenAI API key
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("OPENAI_API_KEY")
+if api_key is None:
+    raise ValueError("OPENAI_API_KEY が設定されていません。")
+
+os.environ["OPENAI_API_KEY"] = api_key
 
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
@@ -49,7 +53,7 @@ def initialize_retriever() -> VectorStoreRetriever:
 def initialize_chain():
     """Initialize the Langchain."""
     prompt = hub.pull("rlm/rag-prompt")
-    llm = ChatOpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
+    llm = ChatOpenAI(openai_api_key=api_key)
     retriever = initialize_retriever()
 
     def chain(user_input):
@@ -94,3 +98,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
