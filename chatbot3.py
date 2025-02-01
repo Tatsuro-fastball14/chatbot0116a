@@ -7,22 +7,28 @@ import streamlit as st
 
 from langchain import hub
 from langchain.schema import AIMessage, HumanMessage
-from langchain_community.vectorstores import Chroma  # 修正されたインポート
+from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import TextLoader
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 import os
+import openai  # 追加
 
 # Load environment variables
 load_dotenv()
 
-# Set OpenAI API key
-api_key = st.secrets["openai"]["api_key"] if "openai" in st.secrets else os.getenv("OPENAI_API_KEY")
+# Retrieve API key from Streamlit secrets or environment variables
+api_key = st.secrets.get("openai", {}).get("api_key") or os.getenv("OPENAI_API_KEY")
+
 if not api_key:
     st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
     st.stop()
+
+# Set the API key directly to the OpenAI client
+openai.api_key = api_key
+os.environ["OPENAI_API_KEY"] = api_key  # 環境変数としても設定
 
 # Initialize ChatOpenAI with api_base
 llm = ChatOpenAI(
@@ -107,3 +113,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
