@@ -21,9 +21,7 @@ load_dotenv()
 
 # APIキーを取得
 api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("openai", {}).get("api_key")
-api_base = st.secrets.get("openai", {}).get("api_base", "https://api.openai.com/v1")  # API Base を環境変数から取得
-
-if not api_key:
+api_base = st.secrets.get("openai", {}).get("api_base", "https://api.openai.com/v1")
     st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
     st.stop()
 
