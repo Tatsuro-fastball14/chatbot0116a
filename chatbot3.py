@@ -87,13 +87,14 @@ def initialize_chain():
 
 def main() -> None:
     """Streamlit 用の ChatGPT アプリケーションのメイン関数"""
+    st.set_page_config(page_title="RAG ChatGPT")  # ✅ 最初に実行
+    
     st.write("API Key (masked):", api_key[:10] + "********")  # APIキーが正しく取得されているか確認
     st.write("API Base URL:", api_base)  # API Base URL 確認
     
     chain = initialize_chain()
 
     # ページ設定
-    st.set_page_config(page_title="RAG ChatGPT")
     st.header("RAG ChatGPT")
 
     # チャット履歴の初期化
@@ -121,3 +122,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
