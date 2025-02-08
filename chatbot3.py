@@ -14,32 +14,32 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 import os
-import openai  # 追加
+import openai
 
-# Load environment variables
+# 環境変数をロード
 load_dotenv()
 
-# Retrieve API key from Streamlit secrets or environment variables
-api_key = st.secrets.get("openai", {}).get("api_key") or os.getenv("OPENAI_API_KEY")
+# APIキーを取得
+api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("openai", {}).get("api_key")
 
 if not api_key:
     st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
     st.stop()
 
-# Set the API key directly to the OpenAI client
+# APIキーを環境変数と OpenAI クライアントに設定
 openai.api_key = api_key
-os.environ["OPENAI_API_KEY"] = api_key  # 環境変数としても設定
+os.environ["OPENAI_API_KEY"] = api_key
 
-# Initialize ChatOpenAI with api_base
+# ChatOpenAI を初期化
 llm = ChatOpenAI(
-    openai_api_key=api_key,
+    api_key=api_key,
     model_name="gpt-4",  # または "gpt-3.5-turbo"
-    api_base="https://api.openai.com/v1"  # API ベースURLを明示的に指定
+    model_kwargs={"api_base": "https://api.openai.com/v1"}  # 修正
 )
 
 def initialize_vector_store() -> Chroma:
-    """Initialize the VectorStore."""
-    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
+    """VectorStore を初期化"""
+    embeddings = OpenAIEmbeddings(api_key=api_key)
     vector_store_path = "./resources/note.db"
 
     if Path(vector_store_path).exists():
@@ -58,18 +58,18 @@ def initialize_vector_store() -> Chroma:
     return vector_store
 
 def initialize_retriever() -> VectorStoreRetriever:
-    """Initialize the Retriever."""
+    """Retriever を初期化"""
     vector_store = initialize_vector_store()
     return vector_store.as_retriever()
 
 def initialize_chain():
-    """Initialize the Langchain."""
+    """LangChain の初期化"""
     prompt = hub.pull("rlm/rag-prompt")
     retriever = initialize_retriever()
 
     def chain(user_input):
         try:
-            retrieved_docs = retriever.get_relevant_documents(user_input)
+            retrieved_docs = retriever.invoke(user_input)  # 修正
             context = "\n".join([doc.page_content for doc in retrieved_docs])
             formatted_prompt = prompt.format(context=context, question=user_input)
             response = llm.invoke(formatted_prompt)
@@ -81,25 +81,25 @@ def initialize_chain():
     return chain
 
 def main() -> None:
-    """Main function for the ChatGPT using Streamlit."""
+    """Streamlit 用の ChatGPT アプリケーションのメイン関数"""
     chain = initialize_chain()
 
-    # Configure the page
+    # ページ設定
     st.set_page_config(page_title="RAG ChatGPT")
     st.header("RAG ChatGPT")
 
-    # Initialize chat history
+    # チャット履歴の初期化
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Monitor user input
+    # ユーザー入力の監視
     if user_input := st.chat_input("聞きたいことを入力してね！"):
         st.session_state.messages.append(HumanMessage(content=user_input))
         with st.spinner("GPTが入力中です..."):
             response = chain(user_input)
         st.session_state.messages.append(AIMessage(content=response.content))
 
-    # Display chat history
+    # チャット履歴の表示
     messages = st.session_state.get("messages", [])
     for message in messages:
         if isinstance(message, AIMessage):
@@ -113,4 +113,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
