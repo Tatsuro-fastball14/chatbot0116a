@@ -21,6 +21,7 @@ load_dotenv()
 
 # APIキーを取得
 api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("openai", {}).get("api_key")
+api_base = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")  # API Base を環境変数から取得
 
 if not api_key:
     st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
@@ -31,11 +32,15 @@ openai.api_key = api_key
 os.environ["OPENAI_API_KEY"] = api_key
 
 # ChatOpenAI を初期化
-llm = ChatOpenAI(
-    api_key=api_key,
-    model_name="gpt-4",  # または "gpt-3.5-turbo"
-    model_kwargs={"api_base": "https://api.openai.com/v1"}  # 修正
-)
+try:
+    llm = ChatOpenAI(
+        api_key=api_key,
+        model_name="gpt-4",  # または "gpt-3.5-turbo"
+        model_kwargs={"api_base": api_base}  # 修正
+    )
+except Exception as e:
+    st.error(f"ChatOpenAI の初期化に失敗しました: {e}")
+    st.stop()
 
 def initialize_vector_store() -> Chroma:
     """VectorStore を初期化"""
@@ -82,6 +87,9 @@ def initialize_chain():
 
 def main() -> None:
     """Streamlit 用の ChatGPT アプリケーションのメイン関数"""
+    st.write("API Key (masked):", api_key[:10] + "********")  # APIキーが正しく取得されているか確認
+    st.write("API Base URL:", api_base)  # API Base URL 確認
+    
     chain = initialize_chain()
 
     # ページ設定
