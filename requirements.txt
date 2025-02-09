@@ -1,4 +1,4 @@
-chromadb == 0.5.2
+chromadb== 0.3.29
 langchain == 0.2.5
 langchain-cli == 0.0.25
 langchain-openai == 0.1.8
