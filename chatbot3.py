@@ -21,6 +21,9 @@ load_dotenv()
 # Retrieve API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")
 
+# Debug: Display environment variable in Streamlit
+st.write(f"環境変数 OPENAI_API_KEY: {api_key}")
+
 if not api_key:
     st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
     st.stop()
@@ -110,5 +113,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
 
