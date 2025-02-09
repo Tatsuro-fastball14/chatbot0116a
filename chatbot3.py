@@ -14,6 +14,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 import os
+from openai import OpenAI  # 追加
 
 # Load environment variables
 load_dotenv()
@@ -23,6 +24,9 @@ api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
     st.stop()
+
+# Initialize OpenAI client
+client = OpenAI(api_key=api_key)
 
 def initialize_vector_store() -> Chroma:
     """Initialize the VectorStore."""
@@ -101,5 +105,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
