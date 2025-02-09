@@ -1,9 +1,6 @@
-chromadb == 0.5.2
-langchain == 0.2.5
-langchain-cli == 0.0.25
-langchain-openai == 0.1.8
-langchain-community == 0.2.5
-langchain-chroma == 0.1.1
-langchainhub == 0.1.20
-pysqlite3-binary
 openai==1.61.1
+langchain==0.2.0
+chromadb== 0.3.29
+langchain-community==0.2.0
+langchain-openai==0.1.10
+langchainhub==0.1.21
