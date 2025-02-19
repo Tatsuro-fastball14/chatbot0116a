@@ -13,7 +13,10 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 import os
 import openai  # 追加
-
+note_path = "resources/note.txt"
+if not Path(note_path).exists():
+    st.error(f"エラー: {note_path} が見つかりません。正しいパスを指定してください。")
+    st.stop()
 # 環境変数をロード
 load_dotenv()
 
