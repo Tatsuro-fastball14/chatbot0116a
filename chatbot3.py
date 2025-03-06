@@ -8,8 +8,9 @@ from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import openai
-from pathlib import Path
 from streamlit_chat import message
+import os
+from auth import login_user  # ログイン処理をインポート
 
 # OpenAI APIキーの取得
 api_key = st.secrets.get("openai", {}).get("api_key") or os.getenv("OPENAI_API_KEY")
@@ -35,7 +36,6 @@ def initialize_vector_store() -> Chroma:
     if Path(vector_store_path).exists():
         vector_store = Chroma(embedding_function=embeddings, persist_directory=vector_store_path)
     else:
-        # print()
         loader = TextLoader("resources/note.txt", encoding='utf-8')
         docs = loader.load()
 
@@ -72,18 +72,19 @@ def initialize_chain():
     return chain
 
 def main() -> None:
+    # ユーザーのログイン処理
+    login_status = login_user()
+
+    if not login_status:
+        st.stop()  # ログインしないとアプリを動かさない
 
     # サイドバーメニューの作成
     menu = ["ホーム", "ヘルプ"]
     choice = st.sidebar.selectbox("メニュー", menu)
 
-    
     if choice == "ホーム":
-
         """Streamlitを使用したChatGPTのメイン関数。"""
         chain = initialize_chain()
-
-
 
         # チャット履歴の初期化
         if "messages" not in st.session_state:
@@ -92,29 +93,23 @@ def main() -> None:
         # ユーザー入力の監視
         user_input = st.text_input("聞きたいことを入力してください:")
         if user_input:
-            # st.session_state.messages.append(HumanMessage(content=user_input))
             st.session_state.messages.append({"role": "user", "content": HumanMessage(content=user_input)})
             with st.spinner("GPTが入力中です..."):
-                # response = chain(user_input)
                 ai_response = chain(user_input)
 
-            # st.session_state.messages.append(AIMessage(content=response.content))
-            
             st.session_state.messages.append({"role": "assistant", "content": AIMessage(content=ai_response.content)})
 
         # メッセージの表示
         for msg in st.session_state.messages:
-            print(msg)
             if msg['role'] == 'user':
                 message(msg['content'].content, is_user=True, avatar_style="personas")
             elif msg['role'] == 'assistant':
                 message(msg['content'].content, is_user=False, avatar_style="bottts")
-    
+
     elif choice == "ヘルプ":
         st.title("ヘルプ")
         st.write("ここにヘルプ情報を記載します。")
 
-
-
 if __name__ == "__main__":
     main()
+
