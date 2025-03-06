@@ -1,7 +1,4 @@
 from pathlib import Path
-import sqlite3
-import sys
-import chromadb
 import streamlit as st
 from langchain import hub
 from langchain.schema import AIMessage, HumanMessage
@@ -10,42 +7,36 @@ from langchain_community.document_loaders import TextLoader
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from dotenv import load_dotenv
-import os
-import openai  # 追加
-note_path = "resources/note.txt"
-if not Path(note_path).exists():
-    st.error(f"エラー: {note_path} が見つかりません。正しいパスを指定してください。")
-    st.stop()
-# 環境変数をロード
-load_dotenv()
+import openai
+from pathlib import Path
+from streamlit_chat import message
 
-# APIキーを安全に取得
+# OpenAI APIキーの取得
 api_key = st.secrets.get("openai", {}).get("api_key") or os.getenv("OPENAI_API_KEY")
 
 if not api_key:
     st.error("OPENAI_API_KEY が設定されていません。環境変数または .env ファイルを確認してください。")
     st.stop()
 
-# OpenAIのAPIキーをセット
+# OpenAI APIキーの設定
 openai.api_key = api_key
-os.environ["OPENAI_API_KEY"] = api_key  # 環境変数としても設定
 
-# ChatOpenAI の初期化
+# ChatOpenAIの初期化
 llm = ChatOpenAI(
     openai_api_key=api_key,
-    model_name="gpt-4",  # または "gpt-3.5-turbo"
+    model_name="gpt-4",
 )
 
 def initialize_vector_store() -> Chroma:
-    """ベクトルストアの初期化"""
+    """Initialize the VectorStore."""
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     vector_store_path = "./resources/note.db"
 
     if Path(vector_store_path).exists():
         vector_store = Chroma(embedding_function=embeddings, persist_directory=vector_store_path)
     else:
-        loader = TextLoader("resources/note.txt")
+        # print()
+        loader = TextLoader("resources/note.txt", encoding='utf-8')
         docs = loader.load()
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
@@ -58,12 +49,12 @@ def initialize_vector_store() -> Chroma:
     return vector_store
 
 def initialize_retriever() -> VectorStoreRetriever:
-    """Retriever の初期化"""
+    """Retrieverを初期化します。"""
     vector_store = initialize_vector_store()
     return vector_store.as_retriever()
 
 def initialize_chain():
-    """Langchainの初期化"""
+    """LangChainを初期化します。"""
     prompt = hub.pull("rlm/rag-prompt")
     retriever = initialize_retriever()
 
@@ -81,39 +72,49 @@ def initialize_chain():
     return chain
 
 def main() -> None:
-    """Streamlit を使った ChatGPT アプリのメイン関数"""
-    chain = initialize_chain()
 
-    # ページ設定
-    st.set_page_config(page_title="RAG ChatGPT")
-    st.header("RAG ChatGPT")
+    # サイドバーメニューの作成
+    menu = ["ホーム", "ヘルプ"]
+    choice = st.sidebar.selectbox("メニュー", menu)
 
-    # チャット履歴の初期化
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    
+    if choice == "ホーム":
 
-    # ユーザーの入力を取得
-    if user_input := st.chat_input("聞きたいことを入力してね！"):
-        st.session_state.messages.append(HumanMessage(content=user_input))
-        with st.spinner("GPTが入力中です..."):
-            response = chain(user_input)
-        st.session_state.messages.append(AIMessage(content=response.content))
+        """Streamlitを使用したChatGPTのメイン関数。"""
+        chain = initialize_chain()
 
-    # チャット履歴を表示
-    messages = st.session_state.get("messages", [])
-    for message in messages:
-        if isinstance(message, AIMessage):
-            with st.chat_message("assistant"):
-                st.markdown(message.content)
-        elif isinstance(message, HumanMessage):
-            with st.chat_message("user"):
-                st.markdown(message.content)
-        else:
-            st.write(f"System message: {message.content}")
+
+
+        # チャット履歴の初期化
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        # ユーザー入力の監視
+        user_input = st.text_input("聞きたいことを入力してください:")
+        if user_input:
+            # st.session_state.messages.append(HumanMessage(content=user_input))
+            st.session_state.messages.append({"role": "user", "content": HumanMessage(content=user_input)})
+            with st.spinner("GPTが入力中です..."):
+                # response = chain(user_input)
+                ai_response = chain(user_input)
+
+            # st.session_state.messages.append(AIMessage(content=response.content))
+            
+            st.session_state.messages.append({"role": "assistant", "content": AIMessage(content=ai_response.content)})
+
+        # メッセージの表示
+        for msg in st.session_state.messages:
+            print(msg)
+            if msg['role'] == 'user':
+                message(msg['content'].content, is_user=True, avatar_style="personas")
+            elif msg['role'] == 'assistant':
+                message(msg['content'].content, is_user=False, avatar_style="bottts")
+    
+    elif choice == "ヘルプ":
+        st.title("ヘルプ")
+        st.write("ここにヘルプ情報を記載します。")
+
+
 
 if __name__ == "__main__":
     main()
-
-
-
-
