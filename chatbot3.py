@@ -5,30 +5,17 @@ import yaml
 from yaml.loader import SafeLoader
 from openai import OpenAI
 from streamlit_chat import message
-import json
+from openai.types.chat import ChatCompletionMessageParam
 from datetime import datetime
 
-# APIキー設定
-api_key = "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"
-openai = OpenAI(api_key=api_key)
+# ✅ ファインチューニングモデルID（あなたのモデルIDに変更）
+FINE_TUNED_MODEL_ID = "ft:gpt-3.5-turbo-1106:your-org:your-model-id"
 
-# ✅ 最新のファインチューニングジョブのモデルIDを取得
-latest_job = openai.fine_tuning.jobs.list(limit=1).data[0]
-fine_tuned_model_id = latest_job.fine_tuned_model
-print("モデルID", fine_tuned_model_id)
+# ✅ OpenAIクライアント
+openai_client = OpenAI(api_key="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")  # 環境変数やsecrets管理を推奨
 
-# ✅ 推論に使用
-response = openai.chat.completions.create(
-    model=fine_tuned_model_id,
-    messages=[
-        {"role": "user", "content": "沖縄でプライベートなウェディングができる場所は？"}
-    ]
-)
-
-print(response.choices[0].message.content)
 
 # ✅ ログイン処理
-
 def load_config():
     config_path = "config.yaml"
     if not Path(config_path).exists():
@@ -63,23 +50,25 @@ def login_user():
     st.session_state["logged_in"] = False
     return False
 
-# ✅ ファインチューン済みモデルに問い合わせる関数
-def call_fine_tuned_model(user_input):
+
+# ✅ ファインチューニングモデルによる応答関数
+def call_finetuned_model(user_input: str) -> str:
     try:
-        response = openai.chat.completions.create(
-            model=fine_tuned_model_id,
+        response = openai_client.chat.completions.create(
+            model=FINE_TUNED_MODEL_ID,
             messages=[
-                {"role": "system", "content": "あなたは沖縄に詳しいアシスタントです。"},
+                {"role": "system", "content": "あなたは親切な沖縄観光ガイドです。"},
                 {"role": "user", "content": user_input}
             ]
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"エラーが発生しました: {e}"
+        st.error(f"OpenAIエラー: {e}")
+        return "申し訳ありません、回答の生成に失敗しました。"
+
 
 # ✅ メイン関数
-
-def main():
+def main() -> None:
     login_status = login_user()
     if not login_status:
         st.stop()
@@ -88,23 +77,21 @@ def main():
     choice = st.sidebar.selectbox("メニュー", menu, key="menu_select")
 
     if choice == "ホーム":
-        st.title("🤖 AI チャットボット")
+        st.title("🤖 ファインチューニングAIチャットボット")
 
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        user_input = st.text_input("聞きたいことを入力してください:", key="user_input")
+        user_input = st.text_input("質問を入力してください:", key="user_input")
         if user_input:
             st.session_state.messages.append({"role": "user", "content": user_input})
-            with st.spinner("GPTが入力中です..."):
-                ai_response = call_fine_tuned_model(user_input)
-            st.session_state.messages.append({"role": "assistant", "content": ai_response})
+            with st.spinner("考え中..."):
+                ai_reply = call_finetuned_model(user_input)
+            st.session_state.messages.append({"role": "assistant", "content": ai_reply})
 
         for i, msg in enumerate(st.session_state.messages):
-            if msg['role'] == 'user':
-                message(msg['content'], is_user=True, avatar_style="personas", key=f"user_{i}")
-            elif msg['role'] == 'assistant':
-                message(msg['content'], is_user=False, avatar_style="bottts", key=f"assistant_{i}")
+            is_user = msg["role"] == "user"
+            message(msg["content"], is_user=is_user, key=f"{msg['role']}_{i}")
 
     elif choice == "ヘルプ":
         st.title("ヘルプ")
@@ -112,4 +99,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
