@@ -9,7 +9,7 @@ from openai.types.chat import ChatCompletionMessageParam
 from datetime import datetime
 
 # ✅ ファインチューニングモデルID（あなたのモデルIDに変更）
-FINE_TUNED_MODEL_ID = "ft:gpt-3.5-turbo-1106:your-org:your-model-id"
+FINE_TUNED_MODEL_ID = "ft:gpt-3.5-turbo-1106:personal::BH9JWbYY"
 
 # ✅ OpenAIクライアント
 openai_client = OpenAI(api_key="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")  # 環境変数やsecrets管理を推奨
@@ -99,5 +99,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
