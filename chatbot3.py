@@ -12,7 +12,9 @@ from datetime import datetime
 FINE_TUNED_MODEL_ID = "ft:gpt-3.5-turbo-1106:personal::BH9JWbYY"
 
 # ✅ OpenAIクライアント
-openai_client = OpenAI(api_key="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")  # 環境変数やsecrets管理を推奨
+openai_client = OpenAI(api_key="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")
+                               
+  # 環境変数やsecrets管理を推奨
 
 
 # ✅ ログイン処理
@@ -99,3 +101,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
