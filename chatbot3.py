@@ -9,7 +9,8 @@ from openai.types.chat import ChatCompletionMessageParam
 from datetime import datetime
 
 # ✅ ファインチューニングモデルID（あなたのモデルIDに変更）
-FINE_TUNED_MODEL_ID = "ft:gpt-3.5-turbo-1106:personal::BH9JWbYY"
+FINE_TUNED_MODEL_ID = "ft:gpt-3.5-turbo-1106:personal::BFYpzzv"
+
 
 # ✅ OpenAIクライアント
 openai_client = OpenAI(api_key="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")
