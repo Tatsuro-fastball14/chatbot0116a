@@ -13,7 +13,7 @@ FINE_TUNED_MODEL_ID = "ft:gpt-3.5-turbo-1106:personal::BPhJT4ND"
 
 
 # ✅ OpenAIクライアント
-openai_client = OpenAI(api_key="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")
+openai_client = OpenAI(api_key=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"
 
                                
   # 環境変数やsecrets管理を推奨
